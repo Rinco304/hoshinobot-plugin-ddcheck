@@ -90,13 +90,18 @@ async def get_vtb_list() -> List[dict]:
 
 async def get_uid_by_name(name: str) -> int:
     try:
-        url = "http://api.bilibili.com/x/web-interface/search/type"
+        url = "https://api.bilibili.com/x/web-interface/search/type"
         params = {"search_type": "bili_user", "keyword": name}
-        headers = {"cookie": config['cookie']}
+        headers = {
+            "user-agent": "",
+            "cookie": config['cookie']
+        }
+        # print(headers)
         async with httpx.AsyncClient(timeout=10) as client:
             await client.get("https://www.bilibili.com", headers=headers)
             resp = await client.get(url, params=params)
             result = resp.json()
+            # print(result)
             for user in result["data"]["result"]:
                 if user["uname"] == name:
                     return user["mid"]
@@ -191,6 +196,7 @@ async def get_reply(name: str) -> Union[str, bytes]:
         "vtbs": vtbs,
         "num_per_col": num_per_col,
     }
+    # print(result)
     template = env.get_template("info.html")
     content = await template.render_async(info=result)
     return await html_to_pic(content, wait=0, viewport={"width": 100, "height": 100})
