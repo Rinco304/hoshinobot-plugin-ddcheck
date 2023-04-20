@@ -42,15 +42,18 @@ async def ddcheck(bot, ev: CQEvent):
         
     try:
         res = await get_reply(text)
-        img= Image.open(BytesIO(res))
-        img_base64= base64.b64encode(res).decode('utf8')
+        if not isinstance(res, str):
+            img = Image.open(BytesIO(res))
+            img_bytes = BytesIO()
+            img.save(img_bytes, format='PNG')
+            img_base64 = base64.b64encode(img_bytes.getvalue()).decode('utf8')
     except:
         logger.warning(traceback.format_exc())
         await bot.send(ev, "请检查昵称或uid是否正确哦～")
         return
         
     if isinstance(res, str):
-        await bot.send(ev, "出错了，请稍后再试")
+        await bot.send(ev, "出错了，请稍后再试\n"+res)
         return
         
     else:
